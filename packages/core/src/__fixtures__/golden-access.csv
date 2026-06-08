@@ -1,0 +1,2 @@
+tenantId,applicationId,externalAccountId,recordType,payload,observedAt
+tenant_acme,app_payroll,acct_ada,access_grant,"{\"grantId\":\"grant_payroll_admin\",\"principalId\":\"acct_ada\",\"accessType\":\"role\",\"accessId\":\"role_admin\",\"source\":\"golden-csv\"}",2026-06-08T12:00:00.000Z
