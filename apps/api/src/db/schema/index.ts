@@ -3,5 +3,6 @@ export { applications } from './applications.js';
 export { externalAccounts } from './external_accounts.js';
 export { ingestionObservations } from './ingestion_observations.js';
 export { ingestionRuns } from './ingestion_runs.js';
+export { snapshotEdges, snapshotLifecycleEnum, snapshotNodes, snapshots } from './snapshots.js';
 export { tenants } from './tenants.js';
 export { userIdentities } from './user_identities.js';
