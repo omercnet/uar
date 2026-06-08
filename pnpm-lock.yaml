@@ -61,7 +61,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
 
-  packages/connectors: {}
+  packages/connectors:
+    dependencies:
+      '@uar/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:
