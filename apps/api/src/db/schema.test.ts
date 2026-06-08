@@ -13,6 +13,9 @@ const expectedTables = [
   'externalAccounts',
   'ingestionObservations',
   'ingestionRuns',
+  'snapshotEdges',
+  'snapshotNodes',
+  'snapshots',
   'tenants',
   'userIdentities',
 ] as const;
@@ -23,6 +26,9 @@ const migratedTableNames = [
   'external_accounts',
   'ingestion_observations',
   'ingestion_runs',
+  'snapshot_edges',
+  'snapshot_nodes',
+  'snapshots',
   'tenants',
   'user_identities',
 ] as const;
@@ -50,10 +56,13 @@ async function canConnect(databaseUrl: string): Promise<boolean> {
   }
 }
 
-async function dropTask3Tables(databaseUrl: string): Promise<void> {
-  const sql = postgres(databaseUrl, { max: 1 });
+async function dropUarTables(databaseUrl: string): Promise<void> {
+  const sql = postgres(databaseUrl, { max: 1, onnotice: () => undefined });
 
   try {
+    await sql`drop table if exists snapshot_edges cascade`;
+    await sql`drop table if exists snapshot_nodes cascade`;
+    await sql`drop table if exists snapshots cascade`;
     await sql`drop table if exists ingestion_observations cascade`;
     await sql`drop table if exists access_grants cascade`;
     await sql`drop table if exists external_accounts cascade`;
@@ -61,6 +70,9 @@ async function dropTask3Tables(databaseUrl: string): Promise<void> {
     await sql`drop table if exists applications cascade`;
     await sql`drop table if exists user_identities cascade`;
     await sql`drop table if exists tenants cascade`;
+    await sql`drop function if exists enforce_snapshot_lifecycle_transition() cascade`;
+    await sql`drop function if exists reject_frozen_snapshot_record_mutation() cascade`;
+    await sql`drop type if exists snapshot_lifecycle cascade`;
     await sql`drop schema if exists drizzle cascade`;
   } finally {
     await sql.end({ timeout: 1 });
@@ -95,7 +107,7 @@ describe('Drizzle tenant schema', () => {
   it.skipIf(!databaseReachable)(
     'T3-S3 applies migrations and drops Task 3 tables cleanly when Postgres is reachable',
     async () => {
-      await dropTask3Tables(databaseUrl);
+      await dropUarTables(databaseUrl);
       await migrateDatabase({ databaseUrl });
 
       const sql = postgres(databaseUrl, { max: 1 });
@@ -112,7 +124,7 @@ describe('Drizzle tenant schema', () => {
         expect(tables.map((table) => table.tableName)).toEqual([...migratedTableNames].sort());
       } finally {
         await sql.end({ timeout: 1 });
-        await dropTask3Tables(databaseUrl);
+        await dropUarTables(databaseUrl);
       }
     },
   );
