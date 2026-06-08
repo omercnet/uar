@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: uar-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: uar
+      POSTGRES_PASSWORD: uar_dev_password
+      POSTGRES_DB: uar
+    ports:
+      - "5433:5432"
+    volumes:
+      - uar_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uar -d uar"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  uar_pgdata:
