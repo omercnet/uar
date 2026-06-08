@@ -17,3 +17,10 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+# Build / test artifacts
+dist/
+*.tsbuildinfo
+.next/
+coverage/
+.turbo/
