@@ -64,7 +64,11 @@ importers:
         specifier: ^12.18.2
         version: 12.18.2
 
-  packages/connectors: {}
+  packages/connectors:
+    dependencies:
+      '@uar/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:

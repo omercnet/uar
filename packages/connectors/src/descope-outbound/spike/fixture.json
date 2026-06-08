@@ -1,0 +1,62 @@
+{
+  "manifest": {
+    "snapshotId": "snapshot_descope_outbound_spike_2026-06-08",
+    "tenantId": "tenant_acme",
+    "createdAt": "2026-06-08T12:00:00.000Z",
+    "connectorId": "descope-outbound-apps",
+    "recordCounts": {
+      "user": 1,
+      "group_membership": 1,
+      "outbound_app_assignment_probe": 1
+    },
+    "schemaVersion": "1.0.0"
+  },
+  "syncResult": {
+    "cursor": null,
+    "records": [
+      {
+        "tenantId": "tenant_acme",
+        "applicationId": "app_descope",
+        "externalAccountId": "descope_user_u_ada",
+        "recordType": "user",
+        "payload": {
+          "externalUserId": "u_ada",
+          "email": "ada@example.com",
+          "displayName": "Ada Lovelace",
+          "disabled": false,
+          "deleted": false,
+          "provenance": "mocked-descope-outbound-apps-spike"
+        },
+        "observedAt": "2026-06-08T12:00:00.000Z"
+      },
+      {
+        "tenantId": "tenant_acme",
+        "applicationId": "app_descope",
+        "externalAccountId": "descope_user_u_ada",
+        "recordType": "group_membership",
+        "payload": {
+          "externalUserId": "u_ada",
+          "groupId": "grp_engineering",
+          "groupName": "Engineering",
+          "provenance": "mocked-descope-outbound-apps-spike"
+        },
+        "observedAt": "2026-06-08T12:00:00.000Z"
+      },
+      {
+        "tenantId": "tenant_acme",
+        "applicationId": "app_descope",
+        "externalAccountId": "descope_user_u_ada",
+        "recordType": "outbound_app_assignment_probe",
+        "payload": {
+          "externalUserId": "u_ada",
+          "outboundAppId": "descope_outbound_app_github",
+          "outboundAppName": "GitHub",
+          "grantObserved": false,
+          "reason": "Hermetic spike fixture does not prove a stable app-level access grant shape.",
+          "provenance": "mocked-descope-outbound-apps-spike"
+        },
+        "observedAt": "2026-06-08T12:00:00.000Z"
+      }
+    ]
+  }
+}

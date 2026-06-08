@@ -15,5 +15,8 @@
     "build": "tsc -b",
     "test": "vitest run",
     "lint": "eslint src"
+  },
+  "dependencies": {
+    "@uar/core": "workspace:*"
   }
 }
