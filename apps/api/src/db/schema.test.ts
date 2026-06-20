@@ -10,6 +10,7 @@ import * as schema from './schema/index.js';
 const expectedTables = [
   'accessGrants',
   'applications',
+  'connectorCredentials',
   'externalAccounts',
   'ingestionObservations',
   'ingestionRuns',
@@ -23,6 +24,7 @@ const expectedTables = [
 const migratedTableNames = [
   'access_grants',
   'applications',
+  'connector_credentials',
   'external_accounts',
   'ingestion_observations',
   'ingestion_runs',
@@ -65,6 +67,7 @@ async function dropUarTables(databaseUrl: string): Promise<void> {
     await sql`drop table if exists snapshots cascade`;
     await sql`drop table if exists ingestion_observations cascade`;
     await sql`drop table if exists access_grants cascade`;
+    await sql`drop table if exists connector_credentials cascade`;
     await sql`drop table if exists external_accounts cascade`;
     await sql`drop table if exists ingestion_runs cascade`;
     await sql`drop table if exists applications cascade`;
