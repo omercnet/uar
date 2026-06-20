@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@uar/core": "workspace:*",
+    "ky": "^1.14.0",
     "zod": "^4.4.3"
   }
 }
