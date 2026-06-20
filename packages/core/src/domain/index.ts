@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { REVIEW_CAMPAIGN_STATUSES, REVIEW_DECISION_ACTIONS, REVIEW_ITEM_STATUSES } from '../review/lifecycle.js';
+
 const IsoTimestampSchema = z.iso.datetime();
 const NonEmptyStringSchema = z.string().min(1);
 const MetadataSchema = z.record(NonEmptyStringSchema, z.unknown());
@@ -78,7 +80,8 @@ export const ReviewCampaignSchema = z.object({
   campaignId: NonEmptyStringSchema,
   name: NonEmptyStringSchema,
   snapshotId: NonEmptyStringSchema,
-  status: z.enum(['draft', 'active', 'completed', 'cancelled']),
+  snapshotLifecycle: z.literal('frozen'),
+  status: z.enum(REVIEW_CAMPAIGN_STATUSES),
   startsAt: IsoTimestampSchema,
   dueAt: IsoTimestampSchema,
   createdAt: IsoTimestampSchema,
@@ -89,11 +92,13 @@ export const ReviewItemSchema = z.object({
   tenantId: NonEmptyStringSchema,
   reviewItemId: NonEmptyStringSchema,
   campaignId: NonEmptyStringSchema,
+  snapshotId: NonEmptyStringSchema,
   accessGrantId: NonEmptyStringSchema,
   applicationId: NonEmptyStringSchema,
   externalAccountId: NonEmptyStringSchema,
-  status: z.enum(['pending', 'assigned', 'decided', 'exception']),
+  status: z.enum(REVIEW_ITEM_STATUSES),
   decisionId: NonEmptyStringSchema.optional(),
+  suggestedReviewerUserIds: z.array(NonEmptyStringSchema).readonly(),
   createdAt: IsoTimestampSchema,
 });
 export type ReviewItem = z.infer<typeof ReviewItemSchema>;
@@ -116,7 +121,7 @@ export const ReviewDecisionSchema = z.object({
   campaignId: NonEmptyStringSchema,
   reviewItemId: NonEmptyStringSchema,
   reviewerUserId: NonEmptyStringSchema,
-  decision: z.enum(['approve', 'revoke', 'exception']),
+  decision: z.enum(REVIEW_DECISION_ACTIONS),
   decidedAt: IsoTimestampSchema,
   note: z.string(),
 });
