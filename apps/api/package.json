@@ -14,9 +14,11 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@descope/node-sdk": "^2.8.0",
     "@uar/core": "workspace:*",
     "drizzle-orm": "^0.45.2",
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10",
