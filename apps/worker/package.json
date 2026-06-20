@@ -11,7 +11,10 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@uar/api": "workspace:*",
+    "@uar/connectors": "workspace:*",
     "@uar/core": "workspace:*",
-    "pg-boss": "^12.18.2"
+    "pg-boss": "^12.18.2",
+    "zod": "^4.4.3"
   }
 }

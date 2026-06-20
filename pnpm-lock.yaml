@@ -57,18 +57,30 @@ importers:
 
   apps/worker:
     dependencies:
+      '@uar/api':
+        specifier: workspace:*
+        version: link:../api
+      '@uar/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@uar/core':
         specifier: workspace:*
         version: link:../../packages/core
       pg-boss:
         specifier: ^12.18.2
         version: 12.18.2
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
 
   packages/connectors:
     dependencies:
       '@uar/core':
         specifier: workspace:*
         version: link:../core
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
 
   packages/core:
     dependencies:
