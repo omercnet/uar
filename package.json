@@ -10,7 +10,8 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "e2e": "playwright test"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
@@ -19,7 +20,14 @@
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "@playwright/test": "^1.49.1",
+    "@uar/api": "workspace:*",
+    "@uar/connectors": "workspace:*",
+    "@uar/core": "workspace:*",
+    "@uar/reporting": "workspace:*",
+    "tsx": "^4.22.4",
+    "vitest": "^2.1.8",
+    "zod": "^4.4.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild", "sharp"]

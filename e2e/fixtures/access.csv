@@ -1,0 +1,5 @@
+externalAccountId,email,displayName,grantId,accessId,accessLabel,accessType,observedAt
+acct-001,alice@example.com,Alice Anderson,grant-001,role-admin,Production Administrator,role,2026-01-01T00:00:00.000Z
+acct-002,bob@example.com,Bob Brown,grant-002,role-engineer,Backend Engineer,role,2026-01-01T00:00:00.000Z
+acct-003,carol@example.com,Carol Clark,grant-003,role-finance,Finance Analyst,role,2026-01-01T00:00:00.000Z
+acct-004,dave@example.com,Dave Davis,grant-004,role-security,Security Auditor,role,2026-01-01T00:00:00.000Z
