@@ -1,0 +1,7 @@
+{
+  "name": "@uar/e2e-harness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright e2e specs + in-memory single-tenant API harness. Not a workspace member (excluded from apps/*, packages/* globs); this file only marks e2e/*.ts as ESM for tsx + Playwright."
+}

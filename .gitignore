@@ -24,3 +24,9 @@ dist/
 .next/
 coverage/
 .turbo/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
