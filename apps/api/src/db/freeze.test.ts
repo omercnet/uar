@@ -10,58 +10,11 @@ import { beginSnapshotBuild } from '../snapshot/lifecycle.js';
 import { getDatabaseUrl } from './client.js';
 import { migrateDatabase } from './migrate.js';
 import * as schema from './schema/index.js';
-
-type SqlClient = ReturnType<typeof postgres>;
+import type { SqlClient } from './test-support.js';
+import { canConnect, resetUarDatabase, setTenantContext } from './test-support.js';
 
 const databaseUrl = getDatabaseUrl();
 const databaseReachable = await canConnect(databaseUrl);
-
-async function canConnect(url: string): Promise<boolean> {
-  const sql = postgres(url, {
-    connect_timeout: 1,
-    idle_timeout: 1,
-    max: 1,
-  });
-
-  try {
-    await sql`select 1`;
-    return true;
-  } catch {
-    return false;
-  } finally {
-    await sql.end({ timeout: 1 });
-  }
-}
-
-async function resetSnapshotDatabase(url: string): Promise<void> {
-  const sql = postgres(url, { max: 1, onnotice: () => undefined });
-
-  try {
-    await sql`drop table if exists review_decisions cascade`;
-    await sql`drop table if exists review_assignments cascade`;
-    await sql`drop table if exists review_items cascade`;
-    await sql`drop table if exists review_campaigns cascade`;
-    await sql`drop table if exists snapshot_edges cascade`;
-    await sql`drop table if exists snapshot_nodes cascade`;
-    await sql`drop table if exists snapshots cascade`;
-    await sql`drop table if exists ingestion_observations cascade`;
-    await sql`drop table if exists access_grants cascade`;
-    await sql`drop table if exists external_accounts cascade`;
-    await sql`drop table if exists ingestion_runs cascade`;
-    await sql`drop table if exists applications cascade`;
-    await sql`drop table if exists user_identities cascade`;
-    await sql`drop table if exists tenants cascade`;
-    await sql`drop function if exists enforce_snapshot_lifecycle_transition() cascade`;
-    await sql`drop function if exists reject_frozen_snapshot_record_mutation() cascade`;
-    await sql`drop type if exists review_decision_action cascade`;
-    await sql`drop type if exists review_item_status cascade`;
-    await sql`drop type if exists review_campaign_status cascade`;
-    await sql`drop type if exists snapshot_lifecycle cascade`;
-    await sql`drop schema if exists drizzle cascade`;
-  } finally {
-    await sql.end({ timeout: 1 });
-  }
-}
 
 async function expectMutationRejected(action: () => Promise<unknown>): Promise<void> {
   await expect(action()).rejects.toThrow(/frozen snapshot/i);
@@ -135,7 +88,7 @@ describe('snapshot freeze substrate', () => {
   it.skipIf(!databaseReachable)(
     'T4-S3 freeze trigger rejects INSERT/UPDATE/DELETE against frozen snapshot records',
     async () => {
-      await resetSnapshotDatabase(databaseUrl);
+      await resetUarDatabase(databaseUrl);
       await migrateDatabase({ databaseUrl });
 
       const sql = postgres(databaseUrl, { max: 1 });
@@ -146,6 +99,7 @@ describe('snapshot freeze substrate', () => {
       const edgeId = '55555555-5555-4555-8555-555555555555';
 
       try {
+        await setTenantContext(sql, tenantId);
         await sql`
           insert into tenants (tenant_id, slug, name)
           values (${tenantId}, 'freeze-trigger', 'Freeze Trigger')
@@ -196,7 +150,7 @@ describe('snapshot freeze substrate', () => {
         `);
       } finally {
         await sql.end({ timeout: 1 });
-        await resetSnapshotDatabase(databaseUrl);
+        await resetUarDatabase(databaseUrl);
       }
     },
   );
@@ -204,7 +158,7 @@ describe('snapshot freeze substrate', () => {
   it.skipIf(!databaseReachable)(
     'T4-S4 re-sync creates a distinct snapshot row and leaves frozen row byte-identical',
     async () => {
-      await resetSnapshotDatabase(databaseUrl);
+      await resetUarDatabase(databaseUrl);
       await migrateDatabase({ databaseUrl });
 
       const sql = postgres(databaseUrl, { max: 1 });
@@ -213,6 +167,7 @@ describe('snapshot freeze substrate', () => {
       const resyncSnapshotId = '88888888-8888-4888-8888-888888888888';
 
       try {
+        await setTenantContext(sql, tenantId);
         await sql`
           insert into tenants (tenant_id, slug, name)
           values (${tenantId}, 'resync-freeze', 'Resync Freeze')
@@ -289,7 +244,7 @@ describe('snapshot freeze substrate', () => {
         ]);
       } finally {
         await sql.end({ timeout: 1 });
-        await resetSnapshotDatabase(databaseUrl);
+        await resetUarDatabase(databaseUrl);
       }
     },
   );
