@@ -29,6 +29,13 @@
       "when": 1780926963000,
       "tag": "0003_review_domain",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780926964000,
+      "tag": "0004_tenant_rls_hardening",
+      "breakpoints": true
     }
   ]
 }
