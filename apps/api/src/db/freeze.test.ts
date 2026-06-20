@@ -37,6 +37,10 @@ async function resetSnapshotDatabase(url: string): Promise<void> {
   const sql = postgres(url, { max: 1, onnotice: () => undefined });
 
   try {
+    await sql`drop table if exists review_decisions cascade`;
+    await sql`drop table if exists review_assignments cascade`;
+    await sql`drop table if exists review_items cascade`;
+    await sql`drop table if exists review_campaigns cascade`;
     await sql`drop table if exists snapshot_edges cascade`;
     await sql`drop table if exists snapshot_nodes cascade`;
     await sql`drop table if exists snapshots cascade`;
@@ -49,6 +53,9 @@ async function resetSnapshotDatabase(url: string): Promise<void> {
     await sql`drop table if exists tenants cascade`;
     await sql`drop function if exists enforce_snapshot_lifecycle_transition() cascade`;
     await sql`drop function if exists reject_frozen_snapshot_record_mutation() cascade`;
+    await sql`drop type if exists review_decision_action cascade`;
+    await sql`drop type if exists review_item_status cascade`;
+    await sql`drop type if exists review_campaign_status cascade`;
     await sql`drop type if exists snapshot_lifecycle cascade`;
     await sql`drop schema if exists drizzle cascade`;
   } finally {
