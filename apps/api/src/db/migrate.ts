@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url';
 
 import { migrate as runDrizzleMigrations } from 'drizzle-orm/postgres-js/migrator';
 
-import { createDatabaseClient, getDatabaseUrl } from './client.js';
+import { createDatabaseClient, createDatabaseClientAsync } from './client.js';
 
 export interface MigrateDatabaseOptions {
   databaseUrl?: string;
@@ -11,8 +11,16 @@ export interface MigrateDatabaseOptions {
 }
 
 export async function migrateDatabase(options: MigrateDatabaseOptions = {}): Promise<void> {
-  const { databaseUrl = getDatabaseUrl(), migrationsFolder = resolve(process.cwd(), 'drizzle') } = options;
-  const { client, db } = createDatabaseClient(databaseUrl, { max: 1, useAppRole: false });
+  const {
+    databaseUrl,
+    migrationsFolder = process.env.UAR_MIGRATIONS_FOLDER ?? resolve(process.cwd(), 'drizzle'),
+  } = options;
+
+  // If an explicit URL was provided use it directly; otherwise resolve via
+  // Aurora IAM auth (PGHOST + AWS_* env vars) or fall back to DATABASE_URL.
+  const { client, db } = databaseUrl
+    ? createDatabaseClient(databaseUrl, { max: 1, useAppRole: false })
+    : await createDatabaseClientAsync({ max: 1, useAppRole: false });
 
   try {
     await runDrizzleMigrations(db, { migrationsFolder });
@@ -23,7 +31,6 @@ export async function migrateDatabase(options: MigrateDatabaseOptions = {}): Pro
 
 function isMainModule(): boolean {
   const entrypoint = process.argv[1];
-
   return entrypoint !== undefined && import.meta.url === pathToFileURL(entrypoint).href;
 }
 
