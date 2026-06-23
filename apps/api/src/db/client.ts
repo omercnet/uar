@@ -61,9 +61,17 @@ export async function createDatabaseClientAsync(options?: DatabaseClientOptions)
   return createDatabaseClient(url, options);
 }
 
+/** True when running against Aurora via Vercel's IAM integration. */
+function isAurora(): boolean {
+  return Boolean(process.env.PGHOST);
+}
+
 function toPostgresOptions(options: DatabaseClientOptions | undefined): PostgresOptions {
   const { useAppRole = true, ...postgresOptions } = options ?? {};
-  if (!useAppRole) {
+  // On Aurora the IAM user is already a non-superuser so RLS enforces
+  // without needing SET ROLE. Only apply uar_app locally (where the dev
+  // user is a superuser that would otherwise bypass RLS).
+  if (!useAppRole || isAurora()) {
     return postgresOptions;
   }
 
