@@ -36,7 +36,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile; pnpm rebuild esbuild sharp
+        run: pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild esbuild sharp
 
       - name: Build
         run: pnpm -r build
@@ -79,7 +79,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile; pnpm rebuild esbuild sharp
+        run: pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild esbuild sharp
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
