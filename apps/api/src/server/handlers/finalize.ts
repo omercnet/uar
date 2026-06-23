@@ -7,6 +7,7 @@ import {
 import { withTenantTransaction } from '../../db/tenant-context.js';
 import { completeCampaign, getCampaign } from '../../review/campaign-repo.js';
 import { loadFinalizeInput } from '../../snapshot/snapshot-repo.js';
+import { countItems } from '../../review/items-repo.js';
 import { sendJson, sendText } from '../http-adapter.js';
 import { HttpError, type HandlerContext, type RouteHandler } from '../router.js';
 
@@ -23,6 +24,14 @@ export const finalizeCampaignHandler: RouteHandler = async (ctx) => {
 
     if (campaign === undefined) {
       throw missingCampaign(campaignId);
+    }
+
+    const itemCount = await countItems(tx, tenantId, campaignId);
+    if (itemCount === 0) {
+      throw new HttpError(409, {
+        error: 'campaign_not_reviewable',
+        message: `Campaign ${campaignId} has no review items to finalize`,
+      });
     }
 
     const input = await loadFinalizeInput(tx, tenantId, campaign);

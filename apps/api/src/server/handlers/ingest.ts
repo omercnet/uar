@@ -119,6 +119,13 @@ async function ingestCampaign<Tx>(input: IngestCampaignInput<Tx>): Promise<numbe
     throw new HttpError(404, { error: 'not_found', message: 'Review campaign not found' });
   }
 
+  if (campaign.status === 'completed') {
+    throw new HttpError(409, {
+      error: 'campaign_completed',
+      message: 'Cannot ingest into a finalized campaign',
+    });
+  }
+
   const existingItemCount = await input.dependencies.countItems(input.tx, input.tenantId, input.campaignId);
   if (existingItemCount > 0) {
     return existingItemCount;

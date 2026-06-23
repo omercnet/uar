@@ -138,8 +138,8 @@ async function routeRequest(
       return;
     }
 
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    sendJson(res, 500, { error: 'internal_server_error', message });
+    console.error('[api] unhandled error while handling request', error);
+    sendJson(res, 500, { error: 'internal_server_error', message: 'Internal server error' });
   }
 }
 

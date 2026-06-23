@@ -53,8 +53,8 @@ describe('tenant-resolver', () => {
     const session: VerifiedDescopeSession = {
       token: 'session.jwt',
       claims: {
-        sub: 'user-1',
-        dct: 'tenant-1',
+        sub: '22222222-2222-4222-8222-222222222222',
+        dct: '11111111-1111-4111-8111-111111111111',
         roles: ['reviewer'],
       },
     };
@@ -64,8 +64,8 @@ describe('tenant-resolver', () => {
 
     // Then
     expect(context).toEqual({
-      tenantId: 'tenant-1',
-      userId: 'user-1',
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      userId: '22222222-2222-4222-8222-222222222222',
       roles: ['reviewer'],
     });
   });
@@ -75,8 +75,8 @@ describe('tenant-resolver', () => {
     const session: VerifiedDescopeSession = {
       token: 'session.jwt',
       claims: {
-        sub: 'user-1',
-        tenant_id: 'tenant-1',
+        sub: '22222222-2222-4222-8222-222222222222',
+        tenant_id: '11111111-1111-4111-8111-111111111111',
       },
     };
 
@@ -85,8 +85,8 @@ describe('tenant-resolver', () => {
 
     // Then
     expect(context).toEqual({
-      tenantId: 'tenant-1',
-      userId: 'user-1',
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      userId: '22222222-2222-4222-8222-222222222222',
       roles: [],
     });
   });
@@ -96,7 +96,7 @@ describe('tenant-resolver', () => {
     const session: VerifiedDescopeSession = {
       token: 'session.jwt',
       claims: {
-        sub: 'user-1',
+        sub: '22222222-2222-4222-8222-222222222222',
       },
     };
 
@@ -111,9 +111,9 @@ describe('tenant-resolver', () => {
     const session: VerifiedDescopeSession = {
       token: 'session.jwt',
       claims: {
-        sub: 'user-1',
-        dct: 'tenant-1',
-        tenant_id: 'tenant-2',
+        sub: '22222222-2222-4222-8222-222222222222',
+        dct: '11111111-1111-4111-8111-111111111111',
+        tenant_id: '33333333-3333-4333-8333-333333333333',
       },
     };
 
@@ -129,8 +129,8 @@ describe('tenant-resolver', () => {
     const session: VerifiedDescopeSession = {
       token: 'session.jwt',
       claims: {
-        sub: 'user-1',
-        dct: 'tenant-1',
+        sub: '22222222-2222-4222-8222-222222222222',
+        dct: '11111111-1111-4111-8111-111111111111',
       },
     };
     const verifier: DescopeSessionVerifier = {
@@ -146,7 +146,7 @@ describe('tenant-resolver', () => {
 
     // Then
     expect(seenTokens).toEqual(['session.jwt']);
-    expect(context.tenantId).toBe('tenant-1');
+    expect(context.tenantId).toBe('11111111-1111-4111-8111-111111111111');
   });
 
   it('resolves tenant context from the authorization header after Descope verification', async () => {
@@ -155,8 +155,8 @@ describe('tenant-resolver', () => {
       verifySessionToken: async (sessionToken) => ({
         token: sessionToken,
         claims: {
-          sub: 'user-1',
-          dct: 'tenant-1',
+          sub: '22222222-2222-4222-8222-222222222222',
+          dct: '11111111-1111-4111-8111-111111111111',
           roles: ['reviewer'],
         },
       }),
@@ -167,8 +167,8 @@ describe('tenant-resolver', () => {
 
     // Then
     expect(context).toEqual({
-      tenantId: 'tenant-1',
-      userId: 'user-1',
+      tenantId: '11111111-1111-4111-8111-111111111111',
+      userId: '22222222-2222-4222-8222-222222222222',
       roles: ['reviewer'],
     });
   });
@@ -184,8 +184,8 @@ describe('tenant-resolver', () => {
         return {
           jwt: sessionToken,
           token: {
-            sub: 'user-1',
-            dct: 'tenant-1',
+            sub: '22222222-2222-4222-8222-222222222222',
+            dct: '11111111-1111-4111-8111-111111111111',
           },
         };
       },
@@ -198,7 +198,7 @@ describe('tenant-resolver', () => {
     // Then
     expect(observedSessionToken).toBe('session.jwt');
     expect(observedAudience).toBe('api');
-    expect(session.claims.dct).toBe('tenant-1');
+    expect(session.claims.dct).toBe('11111111-1111-4111-8111-111111111111');
   });
 
   it('creates a Descope session verifier from project configuration with the SDK mocked at the boundary', async () => {
@@ -206,8 +206,8 @@ describe('tenant-resolver', () => {
     descopeSdkMock.validateSession.mockResolvedValue({
       jwt: 'session.jwt',
       token: {
-        sub: 'user-1',
-        dct: 'tenant-1',
+        sub: '22222222-2222-4222-8222-222222222222',
+        dct: '11111111-1111-4111-8111-111111111111',
       },
     });
     const config = {
@@ -232,7 +232,7 @@ describe('tenant-resolver', () => {
     expect(descopeSdkMock.validateSession).toHaveBeenCalledWith('session.jwt', {
       audience: ['api', 'worker'],
     });
-    expect(session.claims.dct).toBe('tenant-1');
+    expect(session.claims.dct).toBe('11111111-1111-4111-8111-111111111111');
   });
 
   it('denies access when the Descope SDK returns malformed JWT claims', async () => {
@@ -241,7 +241,7 @@ describe('tenant-resolver', () => {
       validateSession: async (sessionToken) => ({
         jwt: sessionToken,
         token: {
-          dct: 'tenant-1',
+          dct: '11111111-1111-4111-8111-111111111111',
         },
       }),
     };
@@ -262,8 +262,8 @@ describe('tenant-resolver', () => {
         return {
           token: sessionToken,
           claims: {
-            sub: 'user-1',
-            dct: 'tenant-1',
+            sub: '22222222-2222-4222-8222-222222222222',
+            dct: '11111111-1111-4111-8111-111111111111',
           },
         };
       },

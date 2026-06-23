@@ -27,8 +27,8 @@ interface TestEndpointResponse {
 const tenantSession: VerifiedDescopeSession = {
   token: 'session.jwt',
   claims: {
-    sub: 'user-1',
-    dct: 'tenant-1',
+    sub: '22222222-2222-4222-8222-222222222222',
+    dct: '11111111-1111-4111-8111-111111111111',
     roles: ['reviewer'],
   },
 };
@@ -117,7 +117,7 @@ describe('authz middleware', () => {
       makeRequest({
         path: '/campaigns/campaign-1',
         headers: { authorization: 'Bearer session.jwt' },
-        targetTenantId: 'tenant-2',
+        targetTenantId: '33333333-3333-4333-8333-333333333333',
       }),
       async (request) => {
         nextCalls += 1;
@@ -149,7 +149,7 @@ describe('authz middleware', () => {
       makeRequest({
         path: '/campaigns/campaign-1',
         headers: { authorization: 'Bearer session.jwt' },
-        targetTenantId: 'tenant-1',
+        targetTenantId: '11111111-1111-4111-8111-111111111111',
       }),
       async (request) => endpointResponse(request.path, request.tenantContext),
     );
@@ -159,8 +159,8 @@ describe('authz middleware', () => {
       status: 200,
       body: {
         endpoint: '/campaigns/campaign-1',
-        tenantId: 'tenant-1',
-        userId: 'user-1',
+        tenantId: '11111111-1111-4111-8111-111111111111',
+        userId: '22222222-2222-4222-8222-222222222222',
         roles: ['reviewer'],
       },
     });
@@ -229,7 +229,7 @@ describe('authz middleware', () => {
 
     // When
     const response = await middleware(
-      makeRequest({ path: '/campaigns/campaign-1', targetTenantId: 'tenant-2' }),
+      makeRequest({ path: '/campaigns/campaign-1', targetTenantId: '33333333-3333-4333-8333-333333333333' }),
       async (request) => endpointResponse(request.path, request.tenantContext),
     );
 
