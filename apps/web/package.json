@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "UAR_MIGRATIONS_FOLDER=../../apps/api/drizzle tsx ../../apps/api/src/db/migrate.ts && next build",
+    "prebuild": "pnpm --filter @uar/core --filter @uar/api build && UAR_MIGRATIONS_FOLDER=../../apps/api/drizzle tsx ../../apps/api/src/db/migrate.ts",
+    "build": "next build",
     "start": "next start",
     "test": "vitest run",
     "lint": "eslint src --ext .ts,.tsx"
