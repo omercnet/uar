@@ -2,7 +2,11 @@
 -- Convert all identity columns from uuid to text so Descope IDs can be
 -- stored directly without mapping. All statements are idempotent.
 
-CREATE OR REPLACE FUNCTION uar_current_tenant_id()
+-- Must DROP before recreating with a different return type (uuid -> text).
+DROP FUNCTION IF EXISTS uar_current_tenant_id();
+--> statement-breakpoint
+
+CREATE FUNCTION uar_current_tenant_id()
 RETURNS text LANGUAGE sql STABLE AS
 'SELECT NULLIF(current_setting(''uar.tenant_id'', true), '''')';
 --> statement-breakpoint
