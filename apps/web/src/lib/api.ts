@@ -95,8 +95,13 @@ export async function finalizeCampaign(campaignId: string, token: string): Promi
   if (!res.ok) throw new Error(`Finalize failed: ${res.status}`);
 }
 
-export function buildCsvDownloadUrl(campaignId: string): string {
-  return `${API_BASE}/campaigns/${campaignId}/export.csv`;
+export async function downloadCsvEvidence(campaignId: string, token: string): Promise<Blob> {
+  const res = await fetch(`${API_BASE}/campaigns/${campaignId}/export.csv`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(`CSV export failed: ${res.status}`);
+  return res.blob();
 }
 
 // ─── Review Items (Admin view) ────────────────────────────────────────────────

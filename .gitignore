@@ -30,3 +30,8 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+
+# OhMyOpenCode / Hive local state (never commit)
+.hive/
+.omo/
+opencode.jsonc

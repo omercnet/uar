@@ -12,7 +12,7 @@ export interface MigrateDatabaseOptions {
 
 export async function migrateDatabase(options: MigrateDatabaseOptions = {}): Promise<void> {
   const { databaseUrl = getDatabaseUrl(), migrationsFolder = resolve(process.cwd(), 'drizzle') } = options;
-  const { client, db } = createDatabaseClient(databaseUrl, { max: 1 });
+  const { client, db } = createDatabaseClient(databaseUrl, { max: 1, useAppRole: false });
 
   try {
     await runDrizzleMigrations(db, { migrationsFolder });

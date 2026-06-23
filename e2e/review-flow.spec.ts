@@ -3,24 +3,27 @@ import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
 /**
- * Full access-review flow, end-to-end, driving the real Next.js UI:
+ * Full access-review flow, end-to-end, driving the real Next.js UI against the
+ * REAL api server (apps/api/src/server.ts) + Postgres:
  *
- *   create campaign -> activate -> ingest (CSV connector -> materialize)
+ *   create campaign -> activate -> ingest (CSV connector -> materialize -> freeze)
  *   -> reviewer decisions (approve / revoke / exception / needs_follow_up)
  *   -> finalize (reproducible content-hash artifact) -> CSV evidence export.
  *
- * Single-tenant, on a frozen snapshot, with a reproducible content hash
- * (re-finalize is idempotent and returns the same hash).
+ * Single-tenant (STUB_AUTHZ), on a frozen snapshot, with a reproducible content
+ * hash (re-finalize is idempotent and returns the same hash).
  *
- * Infra gating: if the API stack is unreachable (e.g. the harness / Postgres
- * stack cannot boot in this environment), the test skips cleanly, mirroring the
- * repo's existing DB-gated tests, so the unit suite stays green.
+ * The api server assigns server-generated UUID campaign ids, so the campaign id
+ * is captured dynamically from the post-create URL (not hard-coded).
+ *
+ * Infra gating: if the stack is unreachable the test skips cleanly, mirroring
+ * the repo's DB-gated tests, so the unit suite stays green.
  */
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:3001';
 const SNAPSHOT_ID = 'snap-e2e-001';
-const CAMPAIGN_ID = `campaign-${SNAPSHOT_ID}`;
 const GRANT_IDS = ['grant-001', 'grant-002', 'grant-003', 'grant-004'] as const;
 const DECISION_ACTIONS = ['approve', 'revoke', 'exception', 'needs_follow_up'] as const;
+const REVIEWER_USER_ID = '22222222-2222-4222-8222-222222222222';
 
 interface FinalizeResponse {
   readonly contentHash: string;
@@ -45,7 +48,7 @@ test.describe.serial('UAR full access-review flow', () => {
   }) => {
     test.skip(
       !stackReachable,
-      `UAR stack not reachable at ${API_BASE}; skipping e2e (boot the harness + web via playwright webServer).`,
+      `UAR stack not reachable at ${API_BASE}; skipping e2e (boot the api server + web via playwright webServer).`,
     );
 
     // ── 1. Create a campaign on a frozen snapshot ─────────────────────────────
@@ -59,7 +62,10 @@ test.describe.serial('UAR full access-review flow', () => {
     await page.getByTestId('due-at-input').fill('2026-02-05');
     await page.getByTestId('submit-btn').click();
 
-    await expect(page).toHaveURL(new RegExp(`/campaigns/${CAMPAIGN_ID}$`));
+    // The server assigns a UUID campaign id; capture it from the redirect URL.
+    await page.waitForURL(/\/campaigns\/[0-9a-f-]{36}$/);
+    const campaignId = page.url().split('/').pop() ?? '';
+    expect(campaignId).toMatch(/^[0-9a-f-]{36}$/);
 
     // ── 2. Activate the campaign ──────────────────────────────────────────────
     await page.getByTestId('activate-btn').click();
@@ -73,7 +79,7 @@ test.describe.serial('UAR full access-review flow', () => {
     await page.goto('/review');
     await expect(page.getByTestId('assigned-campaign-row')).toHaveCount(1);
     await page.getByTestId('review-campaign-btn').first().click();
-    await expect(page).toHaveURL(new RegExp(`/review/${CAMPAIGN_ID}$`));
+    await expect(page).toHaveURL(new RegExp(`/review/${campaignId}$`));
 
     const decideLinks = page.getByTestId('decide-item-btn');
     await expect(decideLinks).toHaveCount(GRANT_IDS.length);
@@ -99,19 +105,19 @@ test.describe.serial('UAR full access-review flow', () => {
     }
 
     // ── 6. Finalize via the admin UI ──────────────────────────────────────────
-    await page.goto(`/campaigns/${CAMPAIGN_ID}`);
+    await page.goto(`/campaigns/${campaignId}`);
     await expect(page.getByTestId('finalize-btn')).toBeVisible();
     await page.getByTestId('finalize-btn').click();
-    await expect(page).toHaveURL(new RegExp(`/campaigns/${CAMPAIGN_ID}/finalize$`));
+    await expect(page).toHaveURL(new RegExp(`/campaigns/${campaignId}/finalize$`));
     await page.getByTestId('finalize-submit-btn').click();
     await expect(page.getByTestId('download-csv-btn')).toBeVisible();
 
     // ── 7. Reproducible content hash: re-finalize is idempotent ───────────────
-    const firstFinalize = await request.post(`${API_BASE}/campaigns/${CAMPAIGN_ID}/finalize`);
+    const firstFinalize = await request.post(`${API_BASE}/campaigns/${campaignId}/finalize`);
     expect(firstFinalize.ok()).toBeTruthy();
     const firstBody = (await firstFinalize.json()) as FinalizeResponse;
 
-    const secondFinalize = await request.post(`${API_BASE}/campaigns/${CAMPAIGN_ID}/finalize`);
+    const secondFinalize = await request.post(`${API_BASE}/campaigns/${campaignId}/finalize`);
     expect(secondFinalize.ok()).toBeTruthy();
     const secondBody = (await secondFinalize.json()) as FinalizeResponse;
 
@@ -136,7 +142,7 @@ test.describe.serial('UAR full access-review flow', () => {
     for (const action of DECISION_ACTIONS) {
       expect(csv).toContain(action);
     }
-    expect(csv).toContain('reviewer-e2e');
+    expect(csv).toContain(REVIEWER_USER_ID);
     expect(csv).toContain('has_grant');
   });
 });

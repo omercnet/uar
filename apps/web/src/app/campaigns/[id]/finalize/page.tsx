@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { ReviewCampaign, ReviewItem } from '@uar/core';
 import { StatusBadge } from '@/components/StatusBadge';
-import { buildCsvDownloadUrl, finalizeCampaign, getCampaign, listCampaignItems } from '@/lib/api';
+import { downloadCsvEvidence, finalizeCampaign, getCampaign, listCampaignItems } from '@/lib/api';
 import { getToken } from '@/lib/token';
 
 export default function FinalizeCampaignPage() {
@@ -40,6 +40,18 @@ export default function FinalizeCampaignPage() {
     } finally {
       setFinalizing(false);
     }
+  }
+
+  async function handleDownloadCsv() {
+    const blob = await downloadCsvEvidence(campaignId, getToken());
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `evidence-${campaignId}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   if (loading) {
@@ -94,14 +106,16 @@ export default function FinalizeCampaignPage() {
               Campaign finalized. A content-hash artifact has been recorded.
             </div>
             <div style={{ display: 'flex', gap: 'var(--s3)', flexWrap: 'wrap' }}>
-              <a
-                href={buildCsvDownloadUrl(campaignId)}
+              <button
+                type="button"
                 className="btn btn-success"
-                download
                 data-testid="download-csv-btn"
+                onClick={() => {
+                  void handleDownloadCsv();
+                }}
               >
                 ↓ Download CSV Report
-              </a>
+              </button>
               <Link href="/campaigns" className="btn btn-ghost">
                 ← Back to Campaigns
               </Link>

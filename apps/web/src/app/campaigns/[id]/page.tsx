@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import type { ReviewCampaign, ReviewItem } from '@uar/core';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
-  buildCsvDownloadUrl,
+  downloadCsvEvidence,
   getCampaign,
   listCampaignItems,
   triggerIngest,
@@ -54,6 +54,19 @@ export default function CampaignDetailPage() {
     } finally {
       setActionPending(false);
     }
+  }
+
+  async function handleDownloadCsv(): Promise<void> {
+    if (campaign === null) return;
+    const blob = await downloadCsvEvidence(campaign.campaignId, getToken());
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `evidence-${campaign.campaignId}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function handleIngest() {
@@ -158,14 +171,14 @@ export default function CampaignDetailPage() {
             </>
           )}
           {campaign.status === 'completed' && (
-            <a
-              href={buildCsvDownloadUrl(campaign.campaignId)}
+            <button
+              type="button"
+              onClick={handleDownloadCsv}
               className="btn btn-success"
-              download
               data-testid="download-csv-btn"
             >
               ↓ Download CSV
-            </a>
+            </button>
           )}
         </div>
       </div>
