@@ -1,3 +1,9 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild esbuild sharp"
+  "installCommand": "pnpm install --frozen-lockfile --ignore-scripts && pnpm rebuild esbuild sharp",
+  "crons": [],
+  "functions": {
+    "apps/web/src/app/api/migrate/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }
