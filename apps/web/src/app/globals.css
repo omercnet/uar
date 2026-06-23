@@ -82,6 +82,50 @@ a:hover { color: var(--accent-hover); }
 
 .sidebar-nav { flex: 1; overflow-y: auto; padding: var(--s3) 0; }
 
+.sidebar-footer {
+  padding: var(--s3) var(--s4);
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s3);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.sidebar-user:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.sidebar-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebar-avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-username {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
 .nav-section {
   font-size: 10px;
   font-weight: 700;

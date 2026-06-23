@@ -9,6 +9,7 @@ import type { ReviewItemRecord } from './items.js';
 export interface PersistReviewDecisionInput {
   readonly decisionId: string;
   readonly reviewerUserId: string;
+  readonly reviewerName?: string | null;
   readonly decision: ReviewDecisionAction;
   readonly decidedAt: string;
   readonly note: string;
@@ -30,6 +31,7 @@ export async function applyDecisionAndPersist(
     campaignId: input.item.campaignId,
     reviewItemId: input.item.reviewItemId,
     reviewerUserId: input.decision.reviewerUserId,
+    reviewerName: input.decision.reviewerName ?? null,
     decision: input.decision.decision,
     decidedAt: input.decision.decidedAt,
     note: input.decision.note,

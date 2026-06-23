@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from '@descope/nextjs-sdk/client';
 import type { ReactNode } from 'react';
 
 function NavItem({ href, children }: { href: string; children: ReactNode }) {
@@ -15,6 +16,10 @@ function NavItem({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export function Sidebar() {
+  const { user } = useUser();
+  const displayName = user?.name ?? user?.loginIds?.[0] ?? 'Reviewer';
+  const initials = displayName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -39,6 +44,17 @@ export function Sidebar() {
           My Assignments
         </NavItem>
       </nav>
+
+      <div className="sidebar-footer">
+        <Link href="/settings" className="sidebar-user" aria-label="Account settings">
+          {user?.picture ? (
+            <img src={user.picture} alt={displayName} className="sidebar-avatar" />
+          ) : (
+            <span className="sidebar-avatar sidebar-avatar-initials">{initials}</span>
+          )}
+          <span className="sidebar-username">{displayName}</span>
+        </Link>
+      </div>
     </aside>
   );
 }

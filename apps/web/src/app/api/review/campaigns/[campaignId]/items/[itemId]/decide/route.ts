@@ -8,7 +8,7 @@ import { z } from 'zod';
 
 import { authenticate, badRequest, conflict, notFound, requireUuid } from '@/lib/route-auth';
 
-const Body = z.object({ decision: ReviewDecisionActionSchema, note: z.string() });
+const Body = z.object({ decision: ReviewDecisionActionSchema, note: z.string(), reviewerName: z.string().optional() });
 
 export async function POST(
   req: NextRequest,
@@ -38,6 +38,7 @@ export async function POST(
         decision: {
           decisionId: randomUUID(),
           reviewerUserId: tenantContext.userId,
+          reviewerName: parsed.data.reviewerName ?? null,
           decision: parsed.data.decision,
           decidedAt: new Date().toISOString(),
           note: parsed.data.note,

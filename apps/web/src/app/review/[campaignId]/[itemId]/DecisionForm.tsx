@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useUser } from '@descope/nextjs-sdk/client';
 import type { ReviewDecisionAction } from '@uar/core';
 import { submitDecision } from '@/lib/api';
 import { getToken } from '@/lib/token';
@@ -45,6 +46,7 @@ interface Props {
 
 export function DecisionForm({ campaignId, itemId, currentStatus }: Props) {
   const router = useRouter();
+  const { user } = useUser();
   const [selected, setSelected] = useState<ReviewDecisionAction | null>(null);
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -62,7 +64,11 @@ export function DecisionForm({ campaignId, itemId, currentStatus }: Props) {
     setSubmitting(true);
     setError(null);
     try {
-      await submitDecision(campaignId, itemId, { decision: selected, note }, getToken());
+      await submitDecision(campaignId, itemId, {
+        decision: selected,
+        note,
+        reviewerName: user?.name ?? user?.loginIds[0] ?? undefined,
+      }, getToken());
       setSubmitted(true);
       setTimeout(() => router.push(`/review/${campaignId}`), 1500);
     } catch (err) {

@@ -29,6 +29,7 @@ export interface RecordedReviewDecision {
   readonly campaignId: string;
   readonly reviewItemId: string;
   readonly reviewerUserId: string;
+  readonly reviewerName: string | null;
   readonly decision: ReviewDecisionAction;
   readonly decidedAt: string;
   readonly note: string;
@@ -109,6 +110,7 @@ export class DrizzleReviewDecisionStore implements ReviewDecisionStore {
         decision: reviewDecisions.decision,
         decidedAt: reviewDecisions.decidedAt,
         note: reviewDecisions.note,
+        reviewerName: reviewDecisions.reviewerName,
         snapshotId: reviewItems.snapshotId,
         accessGrantId: reviewItems.accessGrantId,
         applicationId: reviewItems.applicationId,
@@ -131,6 +133,7 @@ export class DrizzleReviewDecisionStore implements ReviewDecisionStore {
       campaignId: row.campaignId,
       reviewItemId: row.reviewItemId,
       reviewerUserId: row.reviewerUserId,
+      reviewerName: row.reviewerName ?? null,
       decision: row.decision,
       decidedAt: row.decidedAt.toISOString(),
       note: row.note,
@@ -165,6 +168,7 @@ export function recordReviewDecision(input: RecordReviewDecisionInput): Recorded
   const item = applyReviewDecision(input.item, decision);
   const recordedDecision = {
     ...decision,
+    reviewerName: null as string | null,
     item,
   } satisfies RecordedReviewDecision;
 

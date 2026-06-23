@@ -173,6 +173,7 @@ export async function listAssignedItems(
 export interface SubmitDecisionInput {
   decision: ReviewDecisionAction;
   note: string;
+  reviewerName?: string;
 }
 
 export async function submitDecision(
