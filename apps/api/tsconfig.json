@@ -4,7 +4,11 @@
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/connectors" }],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/connectors" },
+    { "path": "../../packages/reporting" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }

@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       '@uar/connectors': fileURLToPath(new URL('../../packages/connectors/src/index.ts', import.meta.url)),
       '@uar/core': fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)),
+      '@uar/reporting': fileURLToPath(new URL('../../packages/reporting/src/index.ts', import.meta.url)),
     },
   },
   test: {
