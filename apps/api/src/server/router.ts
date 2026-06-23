@@ -41,12 +41,26 @@ export type Route = {
   readonly handler: RouteHandler;
 };
 
-export function createRouter(routes: readonly Route[]): (req: IncomingMessage, res: ServerResponse) => void {
+export type RouteContextFactory = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  params: Readonly<Record<string, string>>,
+  url: URL,
+) => HandlerContext | undefined | Promise<HandlerContext | undefined>;
+
+export type RouterOptions = {
+  readonly contextFactory?: RouteContextFactory;
+};
+
+export function createRouter(
+  routes: readonly Route[],
+  options: RouterOptions = {},
+): (req: IncomingMessage, res: ServerResponse) => void {
   const compiledRoutes = routes.map(compileRoute);
 
   return (req, res) => {
     setCorsHeaders(res);
-    void routeRequest(req, res, compiledRoutes);
+    void routeRequest(req, res, compiledRoutes, options.contextFactory);
   };
 }
 
@@ -87,6 +101,7 @@ async function routeRequest(
   req: IncomingMessage,
   res: ServerResponse,
   routes: readonly CompiledRoute[],
+  contextFactory: RouteContextFactory | undefined,
 ): Promise<void> {
   try {
     const method = req.method ?? 'GET';
@@ -111,7 +126,12 @@ async function routeRequest(
       });
     }
 
-    await match.route.handler(new RouterHandlerContext(req, res, match.params, url));
+    const ctx = await createHandlerContext(req, res, match.params, url, contextFactory);
+    if (ctx === undefined) {
+      return;
+    }
+
+    await match.route.handler(ctx);
   } catch (error) {
     if (error instanceof HttpError) {
       sendJson(res, error.status, error.body);
@@ -121,6 +141,20 @@ async function routeRequest(
     const message = error instanceof Error ? error.message : 'Internal server error';
     sendJson(res, 500, { error: 'internal_server_error', message });
   }
+}
+
+async function createHandlerContext(
+  req: IncomingMessage,
+  res: ServerResponse,
+  params: Readonly<Record<string, string>>,
+  url: URL,
+  contextFactory: RouteContextFactory | undefined,
+): Promise<HandlerContext | undefined> {
+  if (contextFactory === undefined) {
+    return new RouterHandlerContext(req, res, params, url);
+  }
+
+  return contextFactory(req, res, params, url);
 }
 
 function compileRoute(route: Route): CompiledRoute {

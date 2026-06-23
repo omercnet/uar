@@ -8,5 +8,6 @@ export * from './ingest/job.js';
 export * from './middleware/authz.js';
 export * from './secrets/store.js';
 export * from './server/http-adapter.js';
+export * from './server/app.js';
 export * from './server/router.js';
 export * from './snapshot/materialize.js';
