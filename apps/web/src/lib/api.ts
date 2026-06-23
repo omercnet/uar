@@ -6,7 +6,7 @@
  */
 import type { ReviewCampaign, ReviewCampaignStatus, ReviewDecisionAction, ReviewItem } from '@uar/core';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+// All API calls are same-origin Next.js Route Handlers at /api/*
 
 function authHeaders(token: string): Record<string, string> {
   return {
@@ -19,7 +19,7 @@ function authHeaders(token: string): Record<string, string> {
 
 export async function listCampaigns(token: string): Promise<ReviewCampaign[]> {
   try {
-    const res = await fetch(`${API_BASE}/campaigns`, {
+    const res = await fetch('/api/campaigns', {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -35,7 +35,7 @@ export async function getCampaign(
   token: string,
 ): Promise<ReviewCampaign | null> {
   try {
-    const res = await fetch(`${API_BASE}/campaigns/${campaignId}`, {
+    const res = await fetch(`/api/campaigns/${campaignId}`, {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -57,7 +57,7 @@ export async function createCampaign(
   input: CreateCampaignInput,
   token: string,
 ): Promise<ReviewCampaign> {
-  const res = await fetch(`${API_BASE}/campaigns`, {
+  const res = await fetch('/api/campaigns', {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(input),
@@ -71,7 +71,7 @@ export async function updateCampaignStatus(
   status: ReviewCampaignStatus,
   token: string,
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/campaigns/${campaignId}/status`, {
+  const res = await fetch(`/api/campaigns/${campaignId}/status`, {
     method: 'PATCH',
     headers: authHeaders(token),
     body: JSON.stringify({ status }),
@@ -80,7 +80,7 @@ export async function updateCampaignStatus(
 }
 
 export async function triggerIngest(campaignId: string, token: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/campaigns/${campaignId}/ingest`, {
+  const res = await fetch(`/api/campaigns/${campaignId}/ingest`, {
     method: 'POST',
     headers: authHeaders(token),
   });
@@ -88,7 +88,7 @@ export async function triggerIngest(campaignId: string, token: string): Promise<
 }
 
 export async function finalizeCampaign(campaignId: string, token: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/campaigns/${campaignId}/finalize`, {
+  const res = await fetch(`/api/campaigns/${campaignId}/finalize`, {
     method: 'POST',
     headers: authHeaders(token),
   });
@@ -96,7 +96,7 @@ export async function finalizeCampaign(campaignId: string, token: string): Promi
 }
 
 export async function downloadCsvEvidence(campaignId: string, token: string): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/campaigns/${campaignId}/export.csv`, {
+  const res = await fetch(`/api/campaigns/${campaignId}/export.csv`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
   });
@@ -111,7 +111,7 @@ export async function listCampaignItems(
   token: string,
 ): Promise<ReviewItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/campaigns/${campaignId}/items`, {
+    const res = await fetch(`/api/campaigns/${campaignId}/items`, {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -128,7 +128,7 @@ export async function getCampaignItem(
   token: string,
 ): Promise<ReviewItem | null> {
   try {
-    const res = await fetch(`${API_BASE}/campaigns/${campaignId}/items/${itemId}`, {
+    const res = await fetch(`/api/campaigns/${campaignId}/items/${itemId}`, {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -143,7 +143,7 @@ export async function getCampaignItem(
 
 export async function listAssignedCampaigns(token: string): Promise<ReviewCampaign[]> {
   try {
-    const res = await fetch(`${API_BASE}/review/campaigns`, {
+    const res = await fetch('/api/review/campaigns', {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -159,7 +159,7 @@ export async function listAssignedItems(
   token: string,
 ): Promise<ReviewItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/review/campaigns/${campaignId}/items`, {
+    const res = await fetch(`/api/review/campaigns/${campaignId}/items`, {
       headers: authHeaders(token),
       cache: 'no-store',
     });
@@ -182,7 +182,7 @@ export async function submitDecision(
   token: string,
 ): Promise<void> {
   const res = await fetch(
-    `${API_BASE}/review/campaigns/${campaignId}/items/${itemId}/decide`,
+    `/api/review/campaigns/${campaignId}/items/${itemId}/decide`,
     {
       method: 'POST',
       headers: authHeaders(token),

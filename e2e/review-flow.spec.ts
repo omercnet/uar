@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 
 /**
  * Full access-review flow, end-to-end, driving the real Next.js UI against the
- * REAL api server (apps/api/src/server.ts) + Postgres:
+ * consolidated Next.js Route Handlers + Postgres:
  *
  *   create campaign -> activate -> ingest (CSV connector -> materialize -> freeze)
  *   -> reviewer decisions (approve / revoke / exception / needs_follow_up)
@@ -13,13 +13,12 @@ import { expect, test } from '@playwright/test';
  * Single-tenant (STUB_AUTHZ), on a frozen snapshot, with a reproducible content
  * hash (re-finalize is idempotent and returns the same hash).
  *
- * The api server assigns server-generated UUID campaign ids, so the campaign id
- * is captured dynamically from the post-create URL (not hard-coded).
+ * The Next.js app serves all API endpoints at /api/* on the same origin.
  *
  * Infra gating: if the stack is unreachable the test skips cleanly, mirroring
  * the repo's DB-gated tests, so the unit suite stays green.
  */
-const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:3001';
+const API_BASE = process.env.E2E_BASE_URL ?? 'http://localhost:3100';
 const SNAPSHOT_ID = 'snap-e2e-001';
 const GRANT_IDS = ['grant-001', 'grant-002', 'grant-003', 'grant-004'] as const;
 const DECISION_ACTIONS = ['approve', 'revoke', 'exception', 'needs_follow_up'] as const;
@@ -34,7 +33,7 @@ let stackReachable = false;
 
 test.beforeAll(async () => {
   try {
-    const response = await fetch(`${API_BASE}/health`);
+    const response = await fetch(`${API_BASE}/api/health`);
     stackReachable = response.ok;
   } catch {
     stackReachable = false;
@@ -48,7 +47,7 @@ test.describe.serial('UAR full access-review flow', () => {
   }) => {
     test.skip(
       !stackReachable,
-      `UAR stack not reachable at ${API_BASE}; skipping e2e (boot the api server + web via playwright webServer).`,
+      `UAR stack not reachable at ${API_BASE}; skipping e2e (boot the Next.js server via playwright webServer).`,
     );
 
     // ── 1. Create a campaign on a frozen snapshot ─────────────────────────────
@@ -113,11 +112,11 @@ test.describe.serial('UAR full access-review flow', () => {
     await expect(page.getByTestId('download-csv-btn')).toBeVisible();
 
     // ── 7. Reproducible content hash: re-finalize is idempotent ───────────────
-    const firstFinalize = await request.post(`${API_BASE}/campaigns/${campaignId}/finalize`);
+    const firstFinalize = await request.post(`${API_BASE}/api/campaigns/${campaignId}/finalize`);
     expect(firstFinalize.ok()).toBeTruthy();
     const firstBody = (await firstFinalize.json()) as FinalizeResponse;
 
-    const secondFinalize = await request.post(`${API_BASE}/campaigns/${campaignId}/finalize`);
+    const secondFinalize = await request.post(`${API_BASE}/api/campaigns/${campaignId}/finalize`);
     expect(secondFinalize.ok()).toBeTruthy();
     const secondBody = (await secondFinalize.json()) as FinalizeResponse;
 

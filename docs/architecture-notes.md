@@ -1,82 +1,115 @@
 # Architecture Notes
 
-## High-level modules
+## Status
+
+The UAR platform MVP is **complete and deployed** on `main` (commit `0e3414b`). All 17 planned tasks built, merged, and verified end-to-end against a real browser, real API server, and real Postgres.
+
+## Module map
 
 ```text
-apps/web
-  Admin and reviewer web app.
+apps/web          Next.js 15 App Router — admin + reviewer UI
+                  Routes: /campaigns (list/new/[id]/finalize), /review ([campaignId]/[itemId])
+                  Auth: reads Descope DS cookie → Bearer token → API
 
-apps/api
-  Backend API for campaigns, reviews, connector management, reporting, and Drata uploads.
+apps/api          node:http production API server (port 3001)
+                  11 endpoints + /health + CORS
+                  Auth: Descope session verify → tenant resolver → authz middleware
+                  DB: Drizzle ORM + postgres-js, app-role RLS enforcement
+                  Ingest: runCsvIngestJob inline (no queue needed for MVP)
 
-apps/worker
-  Background jobs for connector syncs, report rendering, scheduled campaigns, and evidence upload retries.
+apps/worker       pg-boss background worker
+                  Registers the CSV ingest job for queue-driven use
+                  Shares runCsvIngestJob / IngestJobStore with @uar/api
 
-packages/core
-  Shared domain types, validation schemas, access graph model, and connector contract.
+packages/core     Zod domain contracts, review lifecycle state machines,
+                  connector contract (AsyncIterable<SyncResult> + cursors),
+                  snapshot manifest, tenant context
 
 packages/connectors
-  Built-in connectors: Descope, manual CSV, and the first SaaS integrations.
+                  CSV connector (manual-csv) — Zod boundary, resumable cursors
+                  GitHub connector — org members, access_grant records, ky transport
+                  Descope outbound spike — 48h contract-driven exploration
 
 packages/reporting
-  CSV/PDF generation and evidence package creation.
+                  finalizeReviewExport — deterministic SHA-256 content hash
+                  EvidenceSink seam + CSV default sink
+                  Drata-shaped stub sink (compiles, unused)
 ```
 
-## Connector contract draft
+## Request lifecycle
 
-Each connector should expose capabilities instead of assuming every app has the same model.
+```
+Browser (DS cookie)
+  → apps/web (Next.js client component)
+     → fetch /campaigns/:id/... with Authorization: Bearer <jwt>
+        → apps/api node:http server
+           → toAuthzRequest (header adapter)
+           → createAuthzMiddleware
+              → verifyBearerSession (Descope SDK or STUB_AUTHZ bypass)
+              → resolveTenantContext (validates UUID claims)
+              → HandlerContext { tenantContext, db, req, res, params, url }
+           → route handler
+              → withTenantTransaction(db, tenantId, async tx => {
+                   SET LOCAL ROLE uar_app           -- non-superuser, RLS enforces
+                   set_config('uar.tenant_id', id, true)  -- tx-local GUC
+                   ... Drizzle queries (RLS filters automatically)
+                 })
+```
+
+## Tenant isolation
+
+Every table has `ENABLE + FORCE ROW LEVEL SECURITY` with policy:
+```sql
+USING (tenant_id = uar_current_tenant_id())
+```
+where `uar_current_tenant_id() = NULLIF(current_setting('uar.tenant_id', true), '')::uuid`.
+
+**Critical**: the app connects as the `uar_app` role (migration `0005`), which is `NOSUPERUSER NOBYPASSRLS`. The dev/CI Postgres user (`uar`) is a superuser that bypasses RLS — without the role switch, isolation silently fails. The `withTenantTransaction` helper sets both the role and the GUC tx-locally so neither leaks across pooled connections.
+
+## Connector contract
 
 ```ts
-type ConnectorCapability =
-  | "users"
-  | "groups"
-  | "roles"
-  | "permissions"
-  | "access_grants"
-  | "owners"
-  | "revoke"
-  | "evidence_links";
+interface Connector {
+  readonly descriptor: CapabilityDescriptor;
+  sync(input: { cursor: string | null }): AsyncIterable<SyncResult>;
+}
 
-type Connector = {
-  id: string;
-  name: string;
-  capabilities: ConnectorCapability[];
-  configure(input: ConnectorConfigInput): Promise<ConnectorInstallation>;
-  testConnection(installation: ConnectorInstallation): Promise<ConnectionHealth>;
-  sync(snapshotContext: SnapshotContext): AsyncIterable<ConnectorRecord>;
-  revoke?(request: RevokeAccessRequest): Promise<RemediationResult>;
+type SyncResult = {
+  cursor: string | null;  // null = final page; commit after consume
+  records: ConnectorRecord[];
+};
+
+type ConnectorRecord = {
+  recordType: 'access_grant' | 'user' | ...;
+  applicationId: string;
+  externalAccountId: string;
+  payload: unknown;  // validated at boundary with Zod
 };
 ```
 
-## Multi-tenancy baseline
-
-- Every table includes `tenant_id`.
-- Auth sessions map Descope identities to tenant memberships and roles.
-- Connector credentials are tenant-scoped and encrypted.
-- Background jobs always carry tenant context.
-- Evidence artifacts are tenant-scoped, content-addressed, and immutable.
+Connectors ship in `packages/connectors`. The ingest pipeline (apps/api/src/ingest/job.ts) calls `connector.sync()`, materializes records into snapshot nodes/edges, upserts the directory graph (applications/identities/accounts/grants), generates review items, and freezes the snapshot — all in one tenant transaction.
 
 ## Evidence model
 
-A finalized review campaign should create an evidence package containing:
+A finalized campaign produces an `EvidenceArtifact` with:
+- `contentHash` — SHA-256 over canonical JSON of sorted nodes + edges + decisions + assignments. Deterministic: re-finalize returns the same hash.
+- `canonicalContent` — passed to `renderCsvEvidence()` → `section,recordJson` CSV.
 
-- Access snapshot used for review.
-- Reviewer assignments.
-- Decisions and timestamps.
-- Exceptions and notes.
-- CSV export.
-- PDF executive/auditor report.
-- Drata upload status and external evidence IDs.
+The snapshot freeze trigger (migration `0001`) blocks any mutation of frozen nodes/edges at the DB layer.
 
-## First implementation recommendation
+## Multi-tenancy checklist
 
-Use TypeScript for the whole system unless there is a strong reason not to:
+- Every table has `tenant_id` (composite PK/FK).
+- App connects as `uar_app` (non-superuser) so RLS enforces.
+- `withTenantTransaction` sets `uar.tenant_id` GUC tx-locally — no session-level leak.
+- Connector credentials encrypted via secrets envelope (AES-GCM, `@uar/api/src/secrets/`).
+- Background jobs carry `TenantContext` in the pg-boss payload envelope.
+- Evidence artifacts are content-addressed and immutable.
 
-- Next.js web app for admin/reviewer UX.
-- Node/TypeScript API and worker.
-- Postgres for relational data.
-- Drizzle or Prisma for schema/migrations.
-- Zod for shared validation schemas.
-- Playwright for end-to-end review flows.
+## What's not in the MVP
 
-This fits Descope web auth, Descope Outbound Apps, SaaS connector SDKs, and open-source SaaS packaging well.
+- Automatic deprovisioning / remediation tickets.
+- PDF executive report (CSV only).
+- Drata upload (stub sink compiles; wire-up is a one-liner once credentials exist).
+- Full Descope login UI (server verifies JWTs when `DESCOPE_PROJECT_ID` is set; the login flow page that sets the DS cookie is a deploy-time Descope configuration step).
+- Every SaaS connector (GitHub + CSV ship; Descope outbound spike is a contract-validated stub).

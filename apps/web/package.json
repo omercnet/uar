@@ -10,8 +10,14 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
+    "@descope/node-sdk": "^2.8.0",
+    "@uar/api": "workspace:*",
+    "@uar/connectors": "workspace:*",
     "@uar/core": "workspace:*",
+    "@uar/reporting": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "next": "^15.1.6",
+    "postgres": "^3.4.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zod": "^4.4.3"

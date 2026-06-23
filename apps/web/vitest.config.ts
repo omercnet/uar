@@ -10,6 +10,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@uar/core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
+      '@uar/api': path.resolve(__dirname, '../../apps/api/src/index.ts'),
+      '@uar/connectors': path.resolve(__dirname, '../../packages/connectors/src/index.ts'),
+      '@uar/reporting': path.resolve(__dirname, '../../packages/reporting/src/index.ts'),
     },
   },
   test: {

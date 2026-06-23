@@ -10,8 +10,6 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
     "test": "vitest run",
     "lint": "eslint src"
   },
