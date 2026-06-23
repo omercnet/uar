@@ -6,7 +6,7 @@ export const applications = pgTable(
   'applications',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     key: text('key').notNull(),
     name: text('name').notNull(),
     connectorId: text('connector_id').notNull(),

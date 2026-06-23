@@ -8,7 +8,7 @@ export const ingestionObservations = pgTable(
   'ingestion_observations',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     ingestionRunId: uuid('ingestion_run_id').notNull(),
     recordType: text('record_type').notNull(),
     payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),

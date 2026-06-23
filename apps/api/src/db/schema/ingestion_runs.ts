@@ -6,7 +6,7 @@ export const ingestionRuns = pgTable(
   'ingestion_runs',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     connectorId: text('connector_id').notNull(),
     status: text('status').notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),

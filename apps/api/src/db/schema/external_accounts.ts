@@ -8,9 +8,9 @@ export const externalAccounts = pgTable(
   'external_accounts',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     applicationId: uuid('application_id').notNull(),
-    userIdentityId: uuid('user_identity_id'),
+    userIdentityId: text('user_identity_id'),
     externalId: text('external_id').notNull(),
     displayName: text('display_name'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

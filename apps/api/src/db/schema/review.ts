@@ -20,7 +20,7 @@ export const reviewCampaigns = pgTable(
   'review_campaigns',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     snapshotId: uuid('snapshot_id').notNull(),
     name: text('name').notNull(),
     status: reviewCampaignStatusEnum('status').default('draft').notNull(),
@@ -50,7 +50,7 @@ export const reviewItems = pgTable(
   'review_items',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     campaignId: uuid('campaign_id').notNull(),
     snapshotId: uuid('snapshot_id').notNull(),
     accessGrantId: uuid('access_grant_id').notNull(),
@@ -106,10 +106,10 @@ export const reviewAssignments = pgTable(
   'review_assignments',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     campaignId: uuid('campaign_id').notNull(),
     reviewItemId: uuid('review_item_id').notNull(),
-    reviewerUserId: uuid('reviewer_user_id').notNull(),
+    reviewerUserId: text('reviewer_user_id').notNull(),
     status: text('status').default('assigned').notNull(),
     assignedAt: timestamp('assigned_at', { withTimezone: true }).notNull(),
     dueAt: timestamp('due_at', { withTimezone: true }),
@@ -145,10 +145,10 @@ export const reviewDecisions = pgTable(
   'review_decisions',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     campaignId: uuid('campaign_id').notNull(),
     reviewItemId: uuid('review_item_id').notNull(),
-    reviewerUserId: uuid('reviewer_user_id').notNull(),
+    reviewerUserId: text('reviewer_user_id').notNull(),
     decision: reviewDecisionActionEnum('decision').notNull(),
     note: text('note').notNull(),
     decidedAt: timestamp('decided_at', { withTimezone: true }).notNull(),

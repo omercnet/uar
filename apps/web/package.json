@@ -11,6 +11,7 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
+    "@descope/nextjs-sdk": "^0.15.46",
     "@descope/node-sdk": "^2.8.0",
     "@uar/api": "workspace:*",
     "@uar/connectors": "workspace:*",

@@ -9,10 +9,10 @@ export const accessGrants = pgTable(
   'access_grants',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     applicationId: uuid('application_id').notNull(),
     externalAccountId: uuid('external_account_id').notNull(),
-    userIdentityId: uuid('user_identity_id'),
+    userIdentityId: text('user_identity_id'),
     grantType: text('grant_type').notNull(),
     grantValue: text('grant_value').notNull(),
     source: text('source').notNull(),

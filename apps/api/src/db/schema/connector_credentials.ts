@@ -8,7 +8,7 @@ export const connectorCredentials = pgTable(
   'connector_credentials',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     applicationId: uuid('application_id').notNull(),
     name: text('name').notNull(),
     encryptedSecret: jsonb('encrypted_secret').$type<EncryptedSecretEnvelope>().notNull(),

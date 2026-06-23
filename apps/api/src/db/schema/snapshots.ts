@@ -10,7 +10,7 @@ export const snapshots = pgTable(
   'snapshots',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     connectorId: text('connector_id').notNull(),
     ingestionRunId: uuid('ingestion_run_id'),
     lifecycle: snapshotLifecycleEnum('lifecycle').default('building').notNull(),
@@ -41,7 +41,7 @@ export const snapshotNodes = pgTable(
   'snapshot_nodes',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     snapshotId: uuid('snapshot_id').notNull(),
     nodeType: text('node_type').notNull(),
     stableId: text('stable_id').notNull(),
@@ -77,7 +77,7 @@ export const snapshotEdges = pgTable(
   'snapshot_edges',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    tenantId: text('tenant_id').notNull(),
     snapshotId: uuid('snapshot_id').notNull(),
     sourceNodeId: uuid('source_node_id').notNull(),
     targetNodeId: uuid('target_node_id').notNull(),

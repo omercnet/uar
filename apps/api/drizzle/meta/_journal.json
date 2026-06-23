@@ -43,6 +43,13 @@
       "when": 1780926965000,
       "tag": "0005_app_role_rls_enforcement",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780926966000,
+      "tag": "0006_text_ids_for_descope",
+      "breakpoints": true
     }
   ]
 }

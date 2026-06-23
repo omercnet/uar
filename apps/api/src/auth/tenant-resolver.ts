@@ -25,8 +25,9 @@ export class TenantResolutionError extends Error {
   }
 }
 
-const IDENTITY_UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Descope IDs use a proprietary format (T... for tenants, U... for users),
+// not UUIDs. Validate they're non-empty strings only.
+const DESCOPE_ID_PATTERN = /^[A-Za-z0-9]{10,}/;
 
 export function resolveTenantContext(session: VerifiedDescopeSession): TenantContext {
   const tenantCandidates = [session.claims.dct, session.claims.tenant_id].filter(
@@ -57,16 +58,16 @@ export function resolveTenantContext(session: VerifiedDescopeSession): TenantCon
   }
 
   const userId = session.claims.sub;
-  if (!IDENTITY_UUID_PATTERN.test(tenantId)) {
+  if (!DESCOPE_ID_PATTERN.test(tenantId)) {
     throw new TenantResolutionError(
       TenantResolutionErrorCodes.invalidIdentity,
-      'Verified Descope session tenant claim is not a valid tenant id (expected a UUID matching a provisioned tenant)',
+      'Verified Descope session tenant claim is not a valid Descope tenant ID',
     );
   }
-  if (!IDENTITY_UUID_PATTERN.test(userId)) {
+  if (!DESCOPE_ID_PATTERN.test(userId)) {
     throw new TenantResolutionError(
       TenantResolutionErrorCodes.invalidIdentity,
-      'Verified Descope session subject is not a valid user id (expected a UUID matching a provisioned identity)',
+      'Verified Descope session subject is not a valid Descope user ID',
     );
   }
 

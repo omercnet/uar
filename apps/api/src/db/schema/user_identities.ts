@@ -1,12 +1,12 @@
-import { foreignKey, index, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { foreignKey, index, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
 import { tenants } from './tenants.js';
 
 export const userIdentities = pgTable(
   'user_identities',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
-    tenantId: uuid('tenant_id').notNull(),
+    id: text('id').primaryKey(),
+    tenantId: text('tenant_id').notNull(),
     primaryEmail: text('primary_email').notNull(),
     displayName: text('display_name'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

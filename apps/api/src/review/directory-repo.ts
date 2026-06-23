@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { ConnectorRecordSchema, type ConnectorRecord } from '@uar/core';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
@@ -136,7 +138,7 @@ async function upsertApplication(tx: TenantDb, tenantId: string, applicationKey:
 async function upsertUserIdentity(tx: TenantDb, tenantId: string, payload: AccessGrantPayload): Promise<string> {
   await tx
     .insert(userIdentities)
-    .values({ tenantId, primaryEmail: payload.email, displayName: payload.displayName })
+    .values({ id: randomUUID(), tenantId, primaryEmail: payload.email, displayName: payload.displayName })
     .onConflictDoNothing({ target: [userIdentities.tenantId, userIdentities.primaryEmail] });
 
   const [row] = await tx
