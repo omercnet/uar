@@ -36,7 +36,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm -r build
@@ -79,7 +79,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
