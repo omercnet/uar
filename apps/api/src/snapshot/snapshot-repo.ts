@@ -9,12 +9,16 @@ import {
   snapshotNodes,
 } from '../db/schema/index.js';
 import type { TenantDb } from '../db/tenant-context.js';
-import type { ReviewCampaignRecord } from '../review/campaign.js';
+
+type FinalizeCampaignReference = {
+  readonly campaignId: string;
+  readonly snapshotId: string;
+};
 
 export async function loadFinalizeInput(
   tx: TenantDb,
   tenantId: string,
-  campaign: ReviewCampaignRecord,
+  campaign: FinalizeCampaignReference,
 ): Promise<FinalizeReviewExportInput> {
   const nodes = await loadContentNodes(tx, tenantId, campaign.snapshotId);
   const edges = await loadContentEdges(tx, tenantId, campaign.snapshotId);

@@ -13,5 +13,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
     fileParallelism: false,
+    maxWorkers: 1,
+    minWorkers: 1,
   },
 });

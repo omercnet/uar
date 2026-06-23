@@ -88,9 +88,16 @@ async function seedReviewItem(tx: TenantDb): Promise<ReviewItemRecord> {
     tenantId: fixture.tenantId,
     connectorId: 'manual-csv',
     ingestionRunId: fixture.ingestionRunId,
-    lifecycle: 'frozen',
     manifest: { schemaVersion: '1' },
   });
+  await tx
+    .update(snapshots)
+    .set({ lifecycle: 'ready' })
+    .where(and(eq(snapshots.tenantId, fixture.tenantId), eq(snapshots.id, fixture.snapshotId)));
+  await tx
+    .update(snapshots)
+    .set({ lifecycle: 'frozen', manifestHash: '0'.repeat(64) })
+    .where(and(eq(snapshots.tenantId, fixture.tenantId), eq(snapshots.id, fixture.snapshotId)));
   await tx.insert(reviewCampaigns).values({
     id: fixture.campaignId,
     tenantId: fixture.tenantId,

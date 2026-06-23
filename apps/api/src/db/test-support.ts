@@ -70,5 +70,6 @@ export async function resetUarDatabase(url: string): Promise<void> {
 }
 
 export async function setTenantContext(sql: SqlClient, tenantId: string): Promise<void> {
+  await sql`set role uar_app`;
   await sql`select set_config('uar.tenant_id', ${tenantId}, false)`;
 }

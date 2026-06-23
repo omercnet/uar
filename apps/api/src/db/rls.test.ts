@@ -93,13 +93,11 @@ async function insertTenantFixture(sql: SqlClient, fixture: TenantFixture): Prom
   `;
   await sql`
     insert into snapshot_nodes (id, tenant_id, snapshot_id, node_type, stable_id, label, payload)
-    values
-      (${fixture.sourceNodeId}, ${fixture.tenantId}, ${fixture.snapshotId}, 'user', 'user-1', 'User', ${sql.json({ email: `${fixture.slug}@example.test` })}),
-      (${fixture.targetNodeId}, ${fixture.tenantId}, ${fixture.snapshotId}, 'grant', 'grant-1', 'Grant', ${sql.json({ role: 'admin' })})
+    values (${fixture.sourceNodeId}, ${fixture.tenantId}, ${fixture.snapshotId}, 'user', 'user-1', 'User', ${sql.json({ email: `${fixture.slug}@example.test` })})
   `;
   await sql`
     insert into snapshot_edges (id, tenant_id, snapshot_id, source_node_id, target_node_id, edge_type, payload)
-    values (${fixture.snapshotEdgeId}, ${fixture.tenantId}, ${fixture.snapshotId}, ${fixture.sourceNodeId}, ${fixture.targetNodeId}, 'has_grant', ${sql.json({ source: 'fixture' })})
+    values (${fixture.snapshotEdgeId}, ${fixture.tenantId}, ${fixture.snapshotId}, ${fixture.sourceNodeId}, ${fixture.sourceNodeId}, 'has_grant', ${sql.json({ source: 'fixture' })})
   `;
   await sql`
     insert into connector_credentials (id, tenant_id, application_id, name, encrypted_secret)
